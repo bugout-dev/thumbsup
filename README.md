@@ -1,0 +1,2 @@
+# thumbsup
+Summarize GitHub issues
