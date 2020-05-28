@@ -130,3 +130,4 @@ dmypy.json
 
 # Custom stuff
 .thumbsup
+dev.env
