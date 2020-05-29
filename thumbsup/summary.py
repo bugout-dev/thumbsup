@@ -13,7 +13,7 @@ class SummaryError(Exception):
 class RateLimitError(Exception):
     pass
 
-RE_GITHUB_ISSUE_EXTRACTOR = re.compile('github.com/(\w+)/(\w+)/issues/(\d+)')
+RE_GITHUB_ISSUE_EXTRACTOR = re.compile('github.com/([^/]+)/([^/]+)/issues/(\d+)')
 GITHUB_ACCEPT_HEADER = (
     "application/vnd.github.v3+json, application/vnd.github.squirrel-girl-preview"
 )
