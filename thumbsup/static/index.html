@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Thumbsup</title>
+    <!-- FONT
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+    <!-- CSS
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+</head>
+
+<body>
+    <div class="container" id="heading">
+        <div class="row">
+            <div class="two column offset-by-four">
+                <h1>Thumbsup</h1>
+            </div>
+        </div>
+    </div>
+    <div class="container" id="submission-div">
+        <form class="form-horizontal" action="/summary" method="POST" id="submission-form">
+            <div class="row">
+                <div class="eight columns offset-by-two">
+                    <label for="url">GitHub Issue URL</label>
+                    <input class="u-full-width u-max-full-width" type="text" id="url" name="url">
+                </div>
+            </div>
+            <div class="row">
+                <div class="eight columns offset-by-two">
+                    <button class="button-primary u-full-width" type="submit" form="submission-form">Summarize</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

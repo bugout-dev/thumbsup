@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Thumbsup</title>
+    <meta charset="utf-8">
+    <!-- FONT
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+    <!-- CSS
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+</head>
+
+<body>
+    <div class="container" id="heading">
+        <div class="row">
+            <div class="two columns offset-by-four">
+                <h1>Thumbsup</h1>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="one columns offset-by-eleven">
+                <a href="/index.html">Home</a>
+            </div>
+        </div>
+    </div>
+    <div class="container" id="results-div">
+        <div class="row">
+            <div class="ten columns offset-by-one">
+            <b>Summary</b> for <a href="{{url}}">{{url}}</a>:
+            </div>
+        </div>
+        {% if results | length %}
+        {% for item in results %}
+        <div class="row">
+            <hr>
+            <div class="ten columns offset-by-two">
+            <em>
+                Comment by <a href="{{item.user.html_url}}">{{item.user.login}}</a> at {{item.updated_at}}
+            </em>
+            </div>
+        </div>
+        <div class="row">
+            <div class="ten columns offset-by-two">
+                {% for emoji, icon in emojis.items() %}
+                {% if emoji in item.reactions %}
+                {{icon}}: {{item.reactions[emoji]}} &nbsp;&nbsp;&nbsp;
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="ten columns offset-by-two">
+            {{item.body | markdown}}
+            </div>
+        </div>
+        <div class="ten columns offset-by-two">
+        <a href="{{item.html_url}}"><button>View on GitHub</button></a>
+        </div>
+        <br>
+        {% endfor %}
+        {% else %}
+        <div class="ten columns offset-by-two">
+        No comments stood out to me on that issue.
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
