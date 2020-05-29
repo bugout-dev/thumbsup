@@ -59,3 +59,12 @@ docker run -p 5000:5000 \
     -e THUMBSUP_RATE_LIMIT_BOUND="$THUMBSUP_RATE_LIMIT_BOUND" \
     simiotics/thumbsup
 ```
+
+See [sample.env](./sample.env) for an example of how to set these environment variables. To use it
+locally:
+
+1. Run `$ cp sample.env my.env`
+
+2. Update the values in `my.env`.
+
+3. Source the file: `$ . my.env`.
