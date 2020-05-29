@@ -63,9 +63,9 @@ def github_issue(issue_url: str, check_rate_limit: bool = True) -> List[Dict[str
         remaining_rate_limit = (
             rate_limit_response.get('resources', {}).get('core', {}).get('remaining', 0)
         )
-        # TODO(neeraj): For now, magic number 10 is good enough. In future, this could become an
-        # environment variable but no need for such complications now.
-        if remaining_rate_limit < 10:
+        rate_limit_bound = os.environ.get('THUMBSUP_RATE_LIMIT_BOUND', '10')
+        rate_limit_bound = int(rate_limit_bound)
+        if remaining_rate_limit < rate_limit_bound:
             raise RateLimitError(f'Remaining GitHub rate limit too low: {remaining_rate_limit}')
 
     match = RE_GITHUB_ISSUE_EXTRACTOR.search(issue_url)
