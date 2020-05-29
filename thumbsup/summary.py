@@ -77,11 +77,8 @@ def github_issue(issue_url: str, check_rate_limit: bool = True) -> List[Dict[str
     comments_url = f'https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/comments'
     r = requests.get(comments_url, headers=headers)
     response = r.json()
-    summary = [
-        comment for comment in response if num_reactions(comment) > 0
-    ]
-    summary.sort(key=lambda c: num_reactions(c) + num_positive_reactions(c), reverse=True)
-    return summary
+    response.sort(key=lambda c: num_reactions(c) + num_positive_reactions(c), reverse=True)
+    return response
 
 if __name__ == '__main__':
     import argparse
