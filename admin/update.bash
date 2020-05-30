@@ -5,4 +5,9 @@
 set -e
 
 SCRIPT_DIR=$(dirname $0)
-echo "Path to new systemd service definition: ${SCRIPT_DIR}/thumbsup.service"
+SERVICE_FILE="${SCRIPT_DIR}/thumbsup.service"
+echo "Replacing existing thumbsup service definition with: ${SERVICE_FILE}"
+mv "${SERVICE_FILE}" /etc/systemd/system/thumbsup.service
+sytemctl daemon-reload
+systemctl restart thumbsup.service
+systemctl status thumbsup.service
