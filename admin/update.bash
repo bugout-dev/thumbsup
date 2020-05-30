@@ -12,6 +12,11 @@ TOKEN_TIMER_FILE="${SCRIPT_DIR}/thumbsuptoken.timer"
 
 echo
 echo
+echo "Updating Python dependencies"
+/home/ubuntu/thumbsup/.thumbsup/bin/pip install -r /home/ubuntu/thumbsup/requirements.txt
+
+echo
+echo
 echo "Updating Thumbsup codebase at: ${THUMBSUP_DIR}"
 git -C "${THUMBSUP_DIR}" checkout master
 git -C "${THUMBSUP_DIR}" pull

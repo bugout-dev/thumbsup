@@ -1,5 +1,5 @@
 [Unit]
-Description=Run foo weekly and on boot
+Description=Run Thumbsup token generator every 55 minutes
 
 [Timer]
 OnBootSec=10s
