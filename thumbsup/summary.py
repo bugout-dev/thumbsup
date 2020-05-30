@@ -7,6 +7,8 @@ from typing import Any, Dict, List
 
 import requests
 
+from . access import UNAUTHENTICATED
+
 class SummaryError(Exception):
     pass
 
@@ -53,9 +55,12 @@ def github_issue(issue_url: str, check_rate_limit: bool = True) -> List[Dict[str
         'Accept': GITHUB_ACCEPT_HEADER,
         'User-Agent': user_agent,
     }
-    github_token = os.environ.get('THUMBSUP_GITHUB_TOKEN')
-    if github_token is not None and github_token != '':
-        headers['Authorization'] = f'token {github_token}'
+    github_token_file = os.environ.get('THUMBSUP_GITHUB_TOKEN_FILE')
+    if github_token_file is not None:
+        with open(github_token_file, 'r') as ifp:
+            github_token = ifp.read().strip()
+        if github_token != UNAUTHENTICATED and github_token != '':
+            headers['Authorization'] = f'token {github_token}'
 
     if check_rate_limit:
         r = requests.get(GITHUB_RATE_LIMIT_URL, headers=headers)
