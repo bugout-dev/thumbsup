@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Create identity file
+      env:
+        DEPLOYMENTKEY: ${{ secrets.DEPLOYMENTKEY }}
+      run: |
+        base64 --decode "$DEPLOYMENTKEY" >deployment.pem
+        chmod 400 deployment.pem
+
+    - name: Update Thumbsup on production server
+      run: |
+        ssh -i deployment.pem -t ubuntu@thumbsup.bugout.dev sudo /home/ubuntu/thumbsup/admin/update.bash
