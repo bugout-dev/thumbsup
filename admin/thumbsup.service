@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn process serving thumbsup
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/thumbsup
+EnvironmentFile=/home/ubuntu/secrets/thumbsup.systemd.env
+ExecStart=/home/ubuntu/thumbsup/.thumbsup/bin/gunicorn --workers 1 --bind unix:thumbsup.sock -m 007 thumbsup.server:app
+
+[Install]
+WantedBy=multi-user.target
