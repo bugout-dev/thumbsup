@@ -1,0 +1,9 @@
+[Unit]
+Description=Run foo weekly and on boot
+
+[Timer]
+OnBootSec=10s
+OnUnitActiveSec=55m
+
+[Install]
+WantedBy=timers.target

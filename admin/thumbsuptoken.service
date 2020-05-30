@@ -1,0 +1,11 @@
+[Unit]
+Description=Gunicorn process serving thumbsup
+After=network.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/thumbsup
+EnvironmentFile=/home/ubuntu/secrets/thumbsup.systemd.env
+ExecStart=/home/ubuntu/thumbsup/.thumbsup/bin/python -m thumbsup.access github $THUMBSUP_GITHUB_TOKEN_FILE
