@@ -15,7 +15,7 @@ jobs:
       env:
         DEPLOYMENTKEY: ${{ secrets.DEPLOYMENTKEY }}
       run: |
-        base64 --decode "$DEPLOYMENTKEY" >deployment.pem
+        echo "$DEPLOYMENTKEY" | base64 --decode  >deployment.pem
         chmod 400 deployment.pem
 
     - name: Update Thumbsup on production server
