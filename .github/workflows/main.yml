@@ -20,4 +20,4 @@ jobs:
 
     - name: Update Thumbsup on production server
       run: |
-        ssh -i deployment.pem -t ubuntu@thumbsup.bugout.dev sudo /home/ubuntu/thumbsup/admin/update.bash
+        ssh -i deployment.pem ubuntu@thumbsup.bugout.dev sudo /home/ubuntu/thumbsup/admin/update.bash
