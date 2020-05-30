@@ -132,3 +132,4 @@ dmypy.json
 .thumbsup
 dev.env
 .vscode/
+dev.token

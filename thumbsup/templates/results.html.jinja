@@ -30,16 +30,34 @@
     <div class="container" id="results-div">
         <div class="row">
             <div class="ten columns offset-by-one">
-            <b>Summary</b> for <a href="{{url}}">{{url}}</a>:
+            <b>Summary</b> for <a href="{{url}}">{{url}}</a> by <a href="{{issue.user.html_url}}">{{issue.user.login}}</a>:
             </div>
         </div>
-        {% if results | length %}
-        {% for item in results %}
+        <div class="row">
+            <div class="ten columns offset-by-one">
+                {% for emoji, icon in emojis.items() %}
+                {% if emoji in issue.reactions %}
+                {{icon}}: {{issue.reactions[emoji]}} &nbsp;&nbsp;&nbsp;
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="ten columns offset-by-one">
+                {{issue.body | markdown}}
+            </div>
+        </div>
         <div class="row">
             <hr>
+            <div class="ten columns offset-by-one">
+            <b>Comments</b>:
+            </div>
+        </div>
+        {% if comments | length %}
+        {% for item in comments %}
+        <div class="row">
             <div class="ten columns offset-by-two">
+            <hr>
             <em>
-                Comment by <a href="{{item.user.html_url}}">{{item.user.login}}</a> at {{item.updated_at}}
+                <a href="{{item.html_url}}">Comment</a> by <a href="{{item.user.html_url}}">{{item.user.login}}</a> at {{item.updated_at}}
             </em>
             </div>
         </div>
@@ -58,10 +76,6 @@
             {{item.body | markdown}}
             </div>
         </div>
-        <div class="ten columns offset-by-two">
-        <a href="{{item.html_url}}"><button>View on GitHub</button></a>
-        </div>
-        <br>
         {% endfor %}
         {% else %}
         <div class="ten columns offset-by-two">

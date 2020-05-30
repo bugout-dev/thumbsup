@@ -29,6 +29,14 @@ def summary():
     if url is None or url == '':
         return redirect('/index.html')
 
-    results = github_issue(url)
+    result = github_issue(url)
+    issue = result['issue']
+    comments = result['comments']
 
-    return render_template('results.html.jinja', url=url, results=results, emojis=GITHUB_EMOJIS)
+    return render_template(
+        'results.html.jinja',
+        url=url,
+        issue=issue,
+        comments=comments,
+        emojis=GITHUB_EMOJIS,
+    )

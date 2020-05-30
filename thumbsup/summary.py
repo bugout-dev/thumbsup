@@ -38,17 +38,26 @@ def num_positive_reactions(comment_object: Dict[str, Any]) -> int:
         num_positive_reactions += reactions.get(emoji, 0)
     return num_positive_reactions
 
-def github_issue(issue_url: str, check_rate_limit: bool = True) -> List[Dict[str, Any]]:
+def github_issue(issue_url: str, check_rate_limit: bool = True) -> Dict[str, Any]:
     """
     Summarizes a GitHub issue.
 
     The current implementation simply sorts the comments on the issue by the number of emoji
     reactions.
 
-    Returns a list of comments following the GitHub API schema for that object:
+    Returns a dictionary of the form
+    {
+        "issue": <issue object>,
+        "comments": <list of comment objects>
+    }
+
+    Issues follow the GitHub API schema for that object:
+    https://developer.github.com/v3/issues/#response-4
+
+    Comments follow the GitHub API schema for that object:
     https://developer.github.com/v3/issues/comments/#list-comments-on-an-issue
 
-    The individual comment objects include the "reactions" key.
+    The individual issue and comment objects include the "reactions" key.
     """
     user_agent = os.environ.get('THUMBSUP_USER_AGENT', 'thumbsup')
     headers = {
@@ -79,11 +88,15 @@ def github_issue(issue_url: str, check_rate_limit: bool = True) -> List[Dict[str
 
     owner, repo, issue_number = match.groups()
 
-    comments_url = f'https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/comments'
+    issue_url = f'https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}'
+    r = requests.get(issue_url, headers=headers)
+    issue_response = r.json()
+
+    comments_url = f'{issue_url}/comments'
     r = requests.get(comments_url, headers=headers)
-    response = r.json()
-    response.sort(key=lambda c: num_reactions(c) + num_positive_reactions(c), reverse=True)
-    return response
+    comment_response = r.json()
+    comment_response.sort(key=lambda c: num_reactions(c) + num_positive_reactions(c), reverse=True)
+    return {'issue': issue_response, 'comments': comment_response}
 
 if __name__ == '__main__':
     import argparse
