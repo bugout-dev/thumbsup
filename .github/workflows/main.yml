@@ -15,9 +15,9 @@ jobs:
       env:
         DEPLOYMENTKEY: ${{ secrets.DEPLOYMENTKEY }}
       run: |
-        echo "$DEPLOYMENTKEY" | base64 --decode  >deployment.pem
-        chmod 400 deployment.pem
+        echo "$DEPLOYMENTKEY" | base64 --decode  >deployment.key
+        chmod 400 deployment.key
 
     - name: Update Thumbsup on production server
       run: |
-        ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i deployment.pem ubuntu@thumbsup.bugout.dev sudo /home/ubuntu/thumbsup/admin/update.bash
+        ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i deployment.key ubuntu@thumbsup.bugout.dev sudo /home/ubuntu/thumbsup/admin/update.bash
