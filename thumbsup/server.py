@@ -7,6 +7,7 @@ import os
 import time
 import uuid
 
+from atomicwrites import atomic_write
 from flask import Flask, redirect, request, render_template
 from flaskext.markdown import Markdown
 
@@ -40,7 +41,7 @@ def summary():
         outfile = os.path.join(QUERIES_DIR, f'{query_time}-{uuid.uuid4()}')
         logging.info(f'Writing URL={url} to file={outfile}')
         try:
-            with open(outfile, 'w') as ofp:
+            with atomic_write(outfile, overwrite=False) as ofp:
                 print(f'{query_time},{url}', file=ofp)
         except Exception as err:
             logging.warning(f'Could not write URL={url} to QUERIES_DIR={QUERIES_DIR}')
