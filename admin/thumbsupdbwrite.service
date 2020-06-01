@@ -1,5 +1,5 @@
 [Unit]
-Description=Refreshes tokens used by Thumbsup
+Description=Writes queries from Thumbsup query directory to database
 After=network.target
 
 [Service]
@@ -8,4 +8,4 @@ User=ubuntu
 Group=www-data
 WorkingDirectory=/home/ubuntu/thumbsup
 EnvironmentFile=/home/ubuntu/secrets/thumbsup.systemd.env
-ExecStart=/home/ubuntu/thumbsup/.thumbsup/bin/python -m thumbsup.access github $THUMBSUP_GITHUB_TOKEN_FILE
+ExecStart=/home/ubuntu/thumbsup/.thumbsup/bin/python -m thumbsup.db write

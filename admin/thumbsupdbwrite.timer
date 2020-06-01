@@ -1,0 +1,9 @@
+[Unit]
+Description=Run Thumbsup database write every minute
+
+[Timer]
+OnBootSec=15s
+OnUnitActiveSec=1m
+
+[Install]
+WantedBy=timers.target
