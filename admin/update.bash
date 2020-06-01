@@ -12,13 +12,17 @@ TOKEN_TIMER_FILE="${SCRIPT_DIR}/thumbsuptoken.timer"
 DBWRITE_SERVICE_FILE="${SCRIPT_DIR}/thumbsupdbwrite.service"
 DBWRITE_TIMER_FILE="${SCRIPT_DIR}/thumbsupdbwrite.timer"
 
-GITHUB_SHA=${GITHUB_SHA:-master}
+GITHUB_SHA=${1:-master}
 
 echo
 echo
 echo "Updating Thumbsup codebase at: ${THUMBSUP_DIR} from ${GITHUB_SHA}"
 git -C "${THUMBSUP_DIR}" fetch origin
 git -C "${THUMBSUP_DIR}" checkout "$GITHUB_SHA"
+if [ "$GITHUB_SHA" = "master" ]
+then
+    git -C "${THUMBSUP_DIR}" pull
+fi
 
 echo
 echo

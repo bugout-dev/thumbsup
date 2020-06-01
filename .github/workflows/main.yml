@@ -20,4 +20,4 @@ jobs:
 
     - name: Update Thumbsup on production server
       run: |
-        ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i deployment.key ubuntu@thumbsup.bugout.dev sudo /home/ubuntu/thumbsup/admin/update.bash
+        ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i deployment.key ubuntu@thumbsup.bugout.dev sudo /home/ubuntu/thumbsup/admin/update.bash "${GITHUB_SHA}"
