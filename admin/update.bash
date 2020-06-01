@@ -16,7 +16,7 @@ GITHUB_SHA=${GITHUB_SHA:-master}
 
 echo
 echo
-echo "Updating Thumbsup codebase at: ${THUMBSUP_DIR}"
+echo "Updating Thumbsup codebase at: ${THUMBSUP_DIR} from ${GITHUB_SHA}"
 git -C "${THUMBSUP_DIR}" fetch origin
 git -C "${THUMBSUP_DIR}" checkout "$GITHUB_SHA"
 
