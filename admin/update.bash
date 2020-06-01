@@ -51,3 +51,7 @@ cp "${SERVICE_FILE}" /etc/systemd/system/thumbsup.service
 systemctl daemon-reload
 systemctl restart thumbsup.service
 systemctl status thumbsup.service
+
+echo
+echo
+echo "Update complete!"
