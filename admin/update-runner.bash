@@ -19,4 +19,4 @@ then
     git -C "${THUMBSUP_DIR}" pull
 fi
 
-"${SCRIPT_DIR}"/update.bash
+bash "${SCRIPT_DIR}"/update.bash
