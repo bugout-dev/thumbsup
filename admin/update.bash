@@ -4,7 +4,7 @@
 
 set -e
 
-SCRIPT_DIR=$(realpath "$(dirname $0)")
+SCRIPT_DIR=$(realpath "$(dirname "$0")")
 SERVICE_FILE="${SCRIPT_DIR}/thumbsup.service"
 TOKEN_SERVICE_FILE="${SCRIPT_DIR}/thumbsuptoken.service"
 TOKEN_TIMER_FILE="${SCRIPT_DIR}/thumbsuptoken.timer"

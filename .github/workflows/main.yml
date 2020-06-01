@@ -20,4 +20,6 @@ jobs:
 
     - name: Update Thumbsup on production server
       run: |
-        ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i deployment.key ubuntu@thumbsup.bugout.dev sudo /home/ubuntu/thumbsup/admin/update-runner.bash "${GITHUB_SHA}"
+        ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i deployment.key ubuntu@thumbsup.bugout.dev git -C /home/ubuntu/thumbsup fetch origin
+        ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i deployment.key ubuntu@thumbsup.bugout.dev git -C /home/ubuntu/thumbsup checkout "${GITHUB_SHA}"
+        ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i deployment.key ubuntu@thumbsup.bugout.dev sudo /home/ubuntu/thumbsup/admin/update.bash
