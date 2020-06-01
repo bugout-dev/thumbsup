@@ -38,7 +38,7 @@ def summary():
 
     if QUERIES_DIR is not None:
         query_time = int(time.time())
-        outfile = os.path.join(QUERIES_DIR, f'{query_time}-{uuid.uuid4()}')
+        outfile = os.path.join(QUERIES_DIR, f'{query_time}-{uuid.uuid4()}.csv')
         logging.info(f'Writing URL={url} to file={outfile}')
         try:
             with atomic_write(outfile, overwrite=False) as ofp:
