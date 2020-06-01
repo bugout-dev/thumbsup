@@ -20,3 +20,5 @@ then
 fi
 
 bash "${SCRIPT_DIR}"/update.bash
+
+chown -R ubuntu:ubuntu "${THUMBSUP_DIR}"
