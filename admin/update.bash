@@ -19,7 +19,6 @@ echo
 echo "Updating Thumbsup codebase at: ${THUMBSUP_DIR}"
 git -C "${THUMBSUP_DIR}" fetch origin
 git -C "${THUMBSUP_DIR}" checkout "$GITHUB_SHA"
-git -C "${THUMBSUP_DIR}" pull
 
 echo
 echo
