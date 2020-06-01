@@ -133,3 +133,4 @@ dmypy.json
 dev.env
 .vscode/
 dev.token
+prod.env
