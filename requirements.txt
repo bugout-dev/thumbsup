@@ -14,6 +14,7 @@ Markdown==3.2.2
 MarkupSafe==1.1.1
 mypy==0.770
 mypy-extensions==0.4.3
+psycopg2==2.8.5
 pycparser==2.20
 PyJWT==1.7.1
 requests==2.23.0
