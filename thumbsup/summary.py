@@ -4,6 +4,7 @@ Thumbsup summaries
 import os
 import re
 from typing import Any, Dict, List
+from urllib.parse import urlsplit
 
 import requests
 
@@ -170,15 +171,36 @@ def stackoverflow_question(question_url: str, check_rate_limit: bool = True) -> 
     accepted_answer = answer_items[0]
     return {'question': question, 'accepted_answer': accepted_answer}
 
+def summarize(url: str, check_rate_limit: bool = True) -> Dict[str, Any]:
+    """
+    Top-level summarizer - selects one of the domain-specific summarizers defined in this module and
+    returns that summarizer's summary.
+    """
+    split_url = urlsplit(url)
+    if 'github.com' in split_url.hostname:
+        return github_issue(url, check_rate_limit)
+    elif 'stackoverflow.com' in split_url.hostname:
+        return stackoverflow_question(url, check_rate_limit)
+
+    return {}
+
 if __name__ == '__main__':
     import argparse
     import json
 
     parser = argparse.ArgumentParser(description='Thumbsup Summaries')
-    parser.add_argument('summary_type', choices={'github', 'stackoverflow'})
+    parser.add_argument(
+        '--summary_type',
+        '-t',
+        choices={'github', 'stackoverflow'},
+        default=None,
+        help='Specific summary type (default: selects automatically)'
+    )
     parser.add_argument('url', help='URL to summarize')
     args = parser.parse_args()
-    if args.summary_type == 'github':
+    if args.summary_type is None:
+        summary = summarize(args.url)
+    elif args.summary_type == 'github':
         summary = github_issue(args.url)
     else:
         summary = stackoverflow_question(args.url)
