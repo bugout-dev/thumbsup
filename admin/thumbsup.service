@@ -7,7 +7,7 @@ User=ubuntu
 Group=www-data
 WorkingDirectory=/home/ubuntu/thumbsup
 EnvironmentFile=/home/ubuntu/secrets/thumbsup.systemd.env
-ExecStart=/home/ubuntu/thumbsup/.thumbsup/bin/gunicorn --workers 1 --bind unix:thumbsup.sock -m 007 thumbsup.server:app
+ExecStart=/home/ubuntu/thumbsup/.thumbsup/bin/gunicorn --workers 4 --bind unix:thumbsup.sock -m 007 thumbsup.server:app
 
 [Install]
 WantedBy=multi-user.target
