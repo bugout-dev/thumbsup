@@ -8,7 +8,8 @@ from urllib.parse import urlsplit
 
 import requests
 
-from . access import UNAUTHENTICATED
+from .access import UNAUTHENTICATED
+from .emojis import GITHUB_EMOJIS
 
 class SummaryError(Exception):
     pass
@@ -51,8 +52,10 @@ def github_issue(issue_url: str, check_rate_limit: bool = True) -> Dict[str, Any
 
     Returns a dictionary of the form
     {
+        "summarizer": "github_issue",
         "issue": <issue object>,
-        "comments": <list of comment objects>
+        "comments": <list of comment objects>,
+        "emojis": emojis.GITHUB_EMOJIS
     }
 
     Issues follow the GitHub API schema for that object:
@@ -103,7 +106,12 @@ def github_issue(issue_url: str, check_rate_limit: bool = True) -> Dict[str, Any
         key=lambda c: github_num_reactions(c) + github_num_positive_reactions(c),
         reverse=True
     )
-    return {'issue': issue_response, 'comments': comment_response}
+    return {
+        'summarizer': 'github_issue',
+        'issue': issue_response,
+        'comments': comment_response,
+        'emojis': GITHUB_EMOJIS
+    }
 
 def stackoverflow_question(question_url: str, check_rate_limit: bool = True) -> Dict[str, Any]:
     """
@@ -115,6 +123,7 @@ def stackoverflow_question(question_url: str, check_rate_limit: bool = True) -> 
 
     Returns a dictionary of the form
     {
+        "summarizer": "stackoverflow_question",
         "question": <question object>,
         "accepted_answer": <None or answer object>
     }
@@ -151,25 +160,37 @@ def stackoverflow_question(question_url: str, check_rate_limit: bool = True) -> 
         raise SummaryError(f'No Stack Overflow question with id {question_id}')
     question = question_items[0]
     accepted_answer_id = question.get('accepted_answer_id')
-    if accepted_answer_id is None:
-        return {'question': question, 'accepted_answer': None}
+    accepted_answer = None
+    if accepted_answer_id is not None:
+        if check_rate_limit:
+            remaining_rate_limit = question_response.get('quota_remaining', 0)
+            rate_limit_bound = os.environ.get('THUMBSUP_STACKEXCHANGE_RATE_LIMIT_BOUND', '100')
+            rate_limit_bound = int(rate_limit_bound)
+            if remaining_rate_limit < rate_limit_bound:
+                raise RateLimitError(
+                    f'Remaining Stack Exchange rate limit too low: {remaining_rate_limit}'
+                )
+        accepted_answer_api_url = f'{STACKEXCHANGE_API_PREFIX}answers/{accepted_answer_id}'
 
-    if check_rate_limit:
-        remaining_rate_limit = question_response.get('quota_remaining', 0)
-        rate_limit_bound = os.environ.get('THUMBSUP_STACKEXCHANGE_RATE_LIMIT_BOUND', '100')
-        rate_limit_bound = int(rate_limit_bound)
-        if remaining_rate_limit < rate_limit_bound:
-            raise RateLimitError(
-                f'Remaining Stack Exchange rate limit too low: {remaining_rate_limit}'
-            )
-    accepted_answer_api_url = f'{STACKEXCHANGE_API_PREFIX}answers/{accepted_answer_id}'
-    r = requests.get(accepted_answer_api_url, params=stackoverflow_request_params)
-    accepted_answer_response = r.json()
-    answer_items = accepted_answer_response.get('items', [])
-    if not answer_items:
-        raise SummaryError(f'No Stack Overflow answer with id {accepted_answer_id}')
-    accepted_answer = answer_items[0]
-    return {'question': question, 'accepted_answer': accepted_answer}
+        # The filter "!--1nZwsgqG)*" specifies that the response should contain both the answer
+        # body and the answer link.
+        # This filter value was constructed by updating the filter on the Stack Exchange API
+        # documentation page for the /answers endpoint:
+        # https://api.stackexchange.com/docs/answers
+        request_params = {**stackoverflow_request_params, 'filter': '!--1nZwsgqG)*'}
+
+        r = requests.get(accepted_answer_api_url, params=request_params)
+        accepted_answer_response = r.json()
+        answer_items = accepted_answer_response.get('items', [])
+        if not answer_items:
+            raise SummaryError(f'No Stack Overflow answer with id {accepted_answer_id}')
+        accepted_answer = answer_items[0]
+
+    return {
+        'summarizer': 'stackoverflow_question',
+        'question': question,
+        'accepted_answer': accepted_answer
+    }
 
 def summarize(url: str, check_rate_limit: bool = True) -> Dict[str, Any]:
     """
@@ -181,7 +202,6 @@ def summarize(url: str, check_rate_limit: bool = True) -> Dict[str, Any]:
         return github_issue(url, check_rate_limit)
     elif 'stackoverflow.com' in split_url.hostname:
         return stackoverflow_question(url, check_rate_limit)
-
     return {}
 
 if __name__ == '__main__':
