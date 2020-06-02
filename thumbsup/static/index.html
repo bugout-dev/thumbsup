@@ -17,6 +17,12 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
 </head>
+<script>
+    function changeInput(value) {
+        const url = document.getElementById("url");
+        url.value = value;
+    }
+</script>
 
 <body>
     <div class="container" id="heading">
@@ -42,11 +48,19 @@
         </form>
     </div>
     <div class="container" id="examples-div">
-        <div class="ten columns offset-by-two">
+        <div class="eleven columns offset-by-two">
             <b>Examples:</b>
             <ul>
-                <li>https://stackoverflow.com/questions/2573135/python-progression-path-from-apprentice-to-guru</li>
-                <li>https://github.com/microsoft/winget-cli/issues/353</li>
+                <li>
+                    <button onClick="changeInput('https://stackoverflow.com/questions/2573135/python-progression-path-from-apprentice-to-guru')">
+                    https://stackoverflow.com/questions/2573135/python-progression-path-from-apprentice-to-guru
+                    </button>
+                </li>
+                <li>
+                    <button onClick="changeInput('https://github.com/microsoft/winget-cli/issues/353')">
+                    https://github.com/microsoft/winget-cli/issues/353
+                    </button>
+                </li>
             </ul>
         </div>
     </div>
