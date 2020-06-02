@@ -12,6 +12,11 @@
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/skeleton.css">
 </head>
+<script>
+    function copyURL() {
+        navigator.clipboard.writeText("https://thumbsup.bugout.dev/summary?url={{ url | urlencode }}")
+    }
+</script>
 
 <body>
     <div class="container" id="heading">
@@ -22,8 +27,14 @@
         </div>
         <hr>
         <div class="row">
-            <div class="one columns offset-by-eleven">
-                <a href="/index.html">Home</a>
+            <div class="eight columns">
+                &nbsp;
+            </div>
+            <div class="two columns">
+                <button onClick="copyURL()">Copy link</button>
+            </div>
+            <div class="two columns">
+                <a href="/index.html"><button>Home</button></a>
             </div>
         </div>
     </div>
@@ -122,6 +133,12 @@
         {% else %}
         No accepted answer for question.
         {% endif %}
+    {% else %}
+        <div class="row">
+            <div class="ten-columns offset-by-one">
+            Could not summarize that URL
+            </div>
+        </div>
     {% endif %}
     </div>
 </body>
