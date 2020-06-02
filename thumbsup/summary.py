@@ -197,11 +197,15 @@ def summarize(url: str, check_rate_limit: bool = True) -> Dict[str, Any]:
     Top-level summarizer - selects one of the domain-specific summarizers defined in this module and
     returns that summarizer's summary.
     """
-    split_url = urlsplit(url)
-    if 'github.com' in split_url.hostname:
-        return github_issue(url, check_rate_limit)
-    elif 'stackoverflow.com' in split_url.hostname:
-        return stackoverflow_question(url, check_rate_limit)
+    try:
+        split_url = urlsplit(url)
+        if 'github.com' in split_url.hostname:
+            return github_issue(url, check_rate_limit)
+        elif 'stackoverflow.com' in split_url.hostname:
+            return stackoverflow_question(url, check_rate_limit)
+    except Exception:
+        pass
+
     return {}
 
 if __name__ == '__main__':
