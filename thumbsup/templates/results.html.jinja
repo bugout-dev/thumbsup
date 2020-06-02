@@ -100,6 +100,7 @@
     {% elif summary.summarizer == "stackoverflow_question" %}
     {% set question = summary.question %}
     {% set accepted_answer = summary.accepted_answer %}
+    {% set regular_answers = summary.regular_answers %}
         <div class="row">
             <div class="ten columns offset-by-one">
             <b>Summary</b> for <a href="{{question.link}}">{{question.title}}</a> by <a href="{{question.owner.link}}">{{question.owner.display_name}}</a>:
@@ -121,7 +122,7 @@
             <div class="ten columns offset-by-two">
             <hr>
             <em>
-                <a href="{{accepted_answer.link}}">Answer</a> by <a href="{{accepted_answer.owner.link}}">{{accepted_answer.owner.display_name}}</a>
+                <a href="{{accepted_answer.link}}">Answer</a> by <a href="{{accepted_answer.owner.link}}">{{accepted_answer.owner.display_name}}</a> with score {{accepted_answer.score}}
             </em>
             </div>
         </div>
@@ -131,7 +132,41 @@
             </div>
         </div>
         {% else %}
-        No accepted answer for question.
+        <div class="row">
+            <div class="ten columns offset-by-one">
+            None
+            </div>
+        <div class="row">
+        {% endif %}
+        <hr>
+        <div class="row">
+            <hr>
+            <div class="ten columns offset-by-one">
+            <b>Regular answers:</b>:
+            </div>
+        </div>
+        {% if regular_answers | length %}
+        {% for answer in regular_answers %}
+        <div class="row">
+            <div class="ten columns offset-by-two">
+            <hr>
+            <em>
+                <a href="{{answer.link}}">Answer</a> by <a href="{{answer.owner.link}}">{{answer.owner.display_name}}</a> with score {{answer.score}}
+            </em>
+            </div>
+        </div>
+        <div class="row">
+            <div class="ten columns offset-by-two">
+            {{answer.body | safe}}
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="row">
+            <div class="ten columns offset-by-one">
+            None
+            </div>
+        <div class="row">
         {% endif %}
     {% else %}
         <div class="row">

@@ -3,7 +3,7 @@ Thumbsup summaries
 """
 import os
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from urllib.parse import urlsplit
 
 import requests
@@ -125,7 +125,8 @@ def stackoverflow_question(question_url: str, check_rate_limit: bool = True) -> 
     {
         "summarizer": "stackoverflow_question",
         "question": <question object>,
-        "accepted_answer": <None or answer object>
+        "accepted_answer": <None or answer object>,
+        "regular_answers": <list of answer objects>
     }
 
     Question objects follow the Stack Exchange API schema:
@@ -159,37 +160,39 @@ def stackoverflow_question(question_url: str, check_rate_limit: bool = True) -> 
     if not question_items:
         raise SummaryError(f'No Stack Overflow question with id {question_id}')
     question = question_items[0]
-    accepted_answer_id = question.get('accepted_answer_id')
-    accepted_answer = None
-    if accepted_answer_id is not None:
-        if check_rate_limit:
-            remaining_rate_limit = question_response.get('quota_remaining', 0)
-            rate_limit_bound = os.environ.get('THUMBSUP_STACKEXCHANGE_RATE_LIMIT_BOUND', '100')
-            rate_limit_bound = int(rate_limit_bound)
-            if remaining_rate_limit < rate_limit_bound:
-                raise RateLimitError(
-                    f'Remaining Stack Exchange rate limit too low: {remaining_rate_limit}'
-                )
-        accepted_answer_api_url = f'{STACKEXCHANGE_API_PREFIX}answers/{accepted_answer_id}'
 
-        # The filter "!--1nZwsgqG)*" specifies that the response should contain both the answer
-        # body and the answer link.
-        # This filter value was constructed by updating the filter on the Stack Exchange API
-        # documentation page for the /answers endpoint:
-        # https://api.stackexchange.com/docs/answers
-        request_params = {**stackoverflow_request_params, 'filter': '!--1nZwsgqG)*'}
+    if check_rate_limit:
+        remaining_rate_limit = question_response.get('quota_remaining', 0)
+        rate_limit_bound = os.environ.get('THUMBSUP_STACKEXCHANGE_RATE_LIMIT_BOUND', '100')
+        rate_limit_bound = int(rate_limit_bound)
+        if remaining_rate_limit < rate_limit_bound:
+            raise RateLimitError(
+                f'Remaining Stack Exchange rate limit too low: {remaining_rate_limit}'
+            )
+    answers_api_url = (
+        f'{STACKEXCHANGE_API_PREFIX}questions/{question_id}/answers'
+    )
 
-        r = requests.get(accepted_answer_api_url, params=request_params)
-        accepted_answer_response = r.json()
-        answer_items = accepted_answer_response.get('items', [])
-        if not answer_items:
-            raise SummaryError(f'No Stack Overflow answer with id {accepted_answer_id}')
-        accepted_answer = answer_items[0]
+    request_params = {**stackoverflow_request_params, 'sort': 'votes'}
+
+    r = requests.get(answers_api_url, params=request_params)
+    answers_response = r.json()
+    answer_items = answers_response.get('items', [])
+    if not answer_items:
+        raise SummaryError(f'No Stack Overflow answers for question with id {question_id}')
+    accepted_answer: Optional[Dict[str, Any]] = None
+    regular_answers: List[Dict[str, Any]] = []
+    for answer in answer_items:
+        if answer.get('is_accepted'):
+            accepted_answer = answer
+        else:
+            regular_answers.append(answer)
 
     return {
         'summarizer': 'stackoverflow_question',
         'question': question,
-        'accepted_answer': accepted_answer
+        'accepted_answer': accepted_answer,
+        'regular_answers': regular_answers[:10]
     }
 
 def summarize(url: str, check_rate_limit: bool = True) -> Dict[str, Any]:
