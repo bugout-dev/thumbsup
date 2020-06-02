@@ -4,10 +4,12 @@ Thumbsup summaries
 import os
 import re
 from typing import Any, Dict, List
+from urllib.parse import urlsplit
 
 import requests
 
-from . access import UNAUTHENTICATED
+from .access import UNAUTHENTICATED
+from .emojis import GITHUB_EMOJIS
 
 class SummaryError(Exception):
     pass
@@ -21,13 +23,16 @@ GITHUB_ACCEPT_HEADER = (
 )
 GITHUB_RATE_LIMIT_URL = 'https://api.github.com/rate_limit'
 
-def num_reactions(comment_object: Dict[str, Any]) -> int:
+RE_STACKOVERFLOW_QUESTION_EXTRACTOR = re.compile('stackoverflow.com/questions/(\d+)/')
+STACKEXCHANGE_API_PREFIX = 'https://api.stackexchange.com/2.2/'
+
+def github_num_reactions(comment_object: Dict[str, Any]) -> int:
     """
     Returns the number of reactions in an issue comment.
     """
     return comment_object.get('reactions', {}).get('total_count', 0)
 
-def num_positive_reactions(comment_object: Dict[str, Any]) -> int:
+def github_num_positive_reactions(comment_object: Dict[str, Any]) -> int:
     """
     Returns the number of positive reactions in an issue comment.
     """
@@ -47,8 +52,10 @@ def github_issue(issue_url: str, check_rate_limit: bool = True) -> Dict[str, Any
 
     Returns a dictionary of the form
     {
+        "summarizer": "github_issue",
         "issue": <issue object>,
-        "comments": <list of comment objects>
+        "comments": <list of comment objects>,
+        "emojis": emojis.GITHUB_EMOJIS
     }
 
     Issues follow the GitHub API schema for that object:
@@ -95,15 +102,126 @@ def github_issue(issue_url: str, check_rate_limit: bool = True) -> Dict[str, Any
     comments_url = f'{issue_url}/comments'
     r = requests.get(comments_url, headers=headers)
     comment_response = r.json()
-    comment_response.sort(key=lambda c: num_reactions(c) + num_positive_reactions(c), reverse=True)
-    return {'issue': issue_response, 'comments': comment_response}
+    comment_response.sort(
+        key=lambda c: github_num_reactions(c) + github_num_positive_reactions(c),
+        reverse=True
+    )
+    return {
+        'summarizer': 'github_issue',
+        'issue': issue_response,
+        'comments': comment_response,
+        'emojis': GITHUB_EMOJIS
+    }
+
+def stackoverflow_question(question_url: str, check_rate_limit: bool = True) -> Dict[str, Any]:
+    """
+    Summarizes a Stack Overflow question.
+
+    The current implementation checks if there is an accepted answer to the question. If there is,
+    it returns the question with the accepted answer. Otherwise, it returns the question with
+    an empty answer object.
+
+    Returns a dictionary of the form
+    {
+        "summarizer": "stackoverflow_question",
+        "question": <question object>,
+        "accepted_answer": <None or answer object>
+    }
+
+    Question objects follow the Stack Exchange API schema:
+    https://api.stackexchange.com/docs/types/question
+
+    Answer objects follow the Stack Exchange API schema:
+    https://api.stackexchange.com/docs/types/answer
+    """
+    stackexchange_request_key = os.environ.get('THUMBSUP_STACKEXCHANGE_REQUEST_KEY')
+    if stackexchange_request_key is None:
+        raise SummaryError('THUMBSUP_STACKEXCHANGE_REQUEST_KEY environment variable not set')
+
+    stackexchange_access_token = os.environ.get('THUMBSUP_STACKEXCHANGE_ACCESS_TOKEN')
+    if stackexchange_request_key is None:
+        raise SummaryError('THUMBSUP_STACKEXCHANGE_ACCESS_TOKEN environment variable not set')
+
+    stackoverflow_request_params: Dict[str, str] = {
+        'site': 'stackoverflow',
+        'filter': 'withBody',
+        'key': stackexchange_request_key,
+        'access_token': stackexchange_access_token,
+    }
+
+    match = RE_STACKOVERFLOW_QUESTION_EXTRACTOR.search(question_url)
+    question_id = match.group(1)
+
+    question_api_url = f'{STACKEXCHANGE_API_PREFIX}questions/{question_id}'
+    r = requests.get(question_api_url, params=stackoverflow_request_params)
+    question_response = r.json()
+    question_items = question_response.get('items', [])
+    if not question_items:
+        raise SummaryError(f'No Stack Overflow question with id {question_id}')
+    question = question_items[0]
+    accepted_answer_id = question.get('accepted_answer_id')
+    accepted_answer = None
+    if accepted_answer_id is not None:
+        if check_rate_limit:
+            remaining_rate_limit = question_response.get('quota_remaining', 0)
+            rate_limit_bound = os.environ.get('THUMBSUP_STACKEXCHANGE_RATE_LIMIT_BOUND', '100')
+            rate_limit_bound = int(rate_limit_bound)
+            if remaining_rate_limit < rate_limit_bound:
+                raise RateLimitError(
+                    f'Remaining Stack Exchange rate limit too low: {remaining_rate_limit}'
+                )
+        accepted_answer_api_url = f'{STACKEXCHANGE_API_PREFIX}answers/{accepted_answer_id}'
+
+        # The filter "!--1nZwsgqG)*" specifies that the response should contain both the answer
+        # body and the answer link.
+        # This filter value was constructed by updating the filter on the Stack Exchange API
+        # documentation page for the /answers endpoint:
+        # https://api.stackexchange.com/docs/answers
+        request_params = {**stackoverflow_request_params, 'filter': '!--1nZwsgqG)*'}
+
+        r = requests.get(accepted_answer_api_url, params=request_params)
+        accepted_answer_response = r.json()
+        answer_items = accepted_answer_response.get('items', [])
+        if not answer_items:
+            raise SummaryError(f'No Stack Overflow answer with id {accepted_answer_id}')
+        accepted_answer = answer_items[0]
+
+    return {
+        'summarizer': 'stackoverflow_question',
+        'question': question,
+        'accepted_answer': accepted_answer
+    }
+
+def summarize(url: str, check_rate_limit: bool = True) -> Dict[str, Any]:
+    """
+    Top-level summarizer - selects one of the domain-specific summarizers defined in this module and
+    returns that summarizer's summary.
+    """
+    split_url = urlsplit(url)
+    if 'github.com' in split_url.hostname:
+        return github_issue(url, check_rate_limit)
+    elif 'stackoverflow.com' in split_url.hostname:
+        return stackoverflow_question(url, check_rate_limit)
+    return {}
 
 if __name__ == '__main__':
     import argparse
     import json
 
     parser = argparse.ArgumentParser(description='Thumbsup Summaries')
+    parser.add_argument(
+        '--summary_type',
+        '-t',
+        choices={'github', 'stackoverflow'},
+        default=None,
+        help='Specific summary type (default: selects automatically)'
+    )
     parser.add_argument('url', help='URL to summarize')
     args = parser.parse_args()
-    summary = github_issue(args.url)
+    if args.summary_type is None:
+        summary = summarize(args.url)
+    elif args.summary_type == 'github':
+        summary = github_issue(args.url)
+    else:
+        summary = stackoverflow_question(args.url)
     print(json.dumps(summary))

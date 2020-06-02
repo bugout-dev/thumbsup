@@ -68,3 +68,9 @@ locally:
 2. Update the values in `my.env`.
 
 3. Source the file: `$ . my.env`.
+
+## Stack Exchange API authentication
+
+To generate an access token for the Stack Exchange API, follow their [authentication guide](https://api.stackexchange.com/docs/authentication).
+
+[This stackapps post](https://stackapps.com/questions/8635/creating-personal-applications-using-stack-overflow-stack-exchange-api) was very helpful.

@@ -11,8 +11,7 @@ from atomicwrites import atomic_write
 from flask import Flask, redirect, request, render_template
 from flaskext.markdown import Markdown
 
-from .emojis import GITHUB_EMOJIS
-from .summary import github_issue
+from .summary import summarize
 
 app = Flask(__name__, static_url_path='/')
 Markdown(app)
@@ -46,14 +45,10 @@ def summary():
         except Exception as err:
             logging.warning(f'Could not write URL={url} to QUERIES_DIR={QUERIES_DIR}')
 
-    result = github_issue(url)
-    issue = result['issue']
-    comments = result['comments']
+    summary = summarize(url)
 
     return render_template(
         'results.html.jinja',
         url=url,
-        issue=issue,
-        comments=comments,
-        emojis=GITHUB_EMOJIS,
+        summary=summary
     )
