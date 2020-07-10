@@ -11,11 +11,13 @@ import uuid
 from atomicwrites import atomic_write
 from flask import Flask, redirect, request, render_template
 from flaskext.markdown import Markdown
+from flask_cors import CORS
 
 from .summary import summarize
 
 app = Flask(__name__, static_url_path='/')
 Markdown(app)
+CORS(app)
 
 QUERIES_DIR = os.environ.get('THUMBSUP_QUERIES_DIR')
 
